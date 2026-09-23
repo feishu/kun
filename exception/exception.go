@@ -12,7 +12,6 @@ import (
 
 	"github.com/TylerBrock/colorjson"
 	"github.com/fatih/color"
-	"github.com/yaoapp/kun/any"
 )
 
 // Mode the mode of the application
@@ -45,6 +44,30 @@ func GetWriter() io.Writer {
 var reEx = regexp.MustCompile(`Exception\|(\d+):(.*)`)
 var reErr = regexp.MustCompile(`Error: (.*)`)
 
+// parseException 零分配高效解析 Exception|<code|int>:<message>
+func parseException(s string) (int, string, bool) {
+	const prefix = "Exception|"
+	if !strings.HasPrefix(s, prefix) {
+		return 0, "", false
+	}
+	rest := s[len(prefix):]
+	colonIdx := strings.IndexByte(rest, ':')
+	if colonIdx <= 0 {
+		return 0, "", false
+	}
+	codeStr := rest[:colonIdx]
+	code := 0
+	for i := 0; i < len(codeStr); i++ {
+		c := codeStr[i]
+		if c < '0' || c > '9' {
+			return 0, "", false
+		}
+		code = code*10 + int(c-'0')
+	}
+	msg := strings.TrimSpace(rest[colonIdx+1:])
+	return code, msg, true
+}
+
 // Exception the Exception type
 type Exception struct {
 	Message string      `json:"message"`
@@ -54,27 +77,34 @@ type Exception struct {
 
 // New Create a new exception instance
 func New(message string, code int, args ...interface{}) *Exception {
-	content := fmt.Sprintf(message, args...)
-	match := reEx.FindStringSubmatch(content)
-	if len(match) > 0 {
-		code = any.Of(match[1]).CInt()
-		content = strings.TrimSpace(match[2])
+	var content string
+	if len(args) == 0 {
+		content = message
+	} else {
+		content = fmt.Sprintf(message, args...)
+	}
+
+	if parsedCode, msg, ok := parseException(content); ok {
+		code = parsedCode
+		content = msg
 	}
 	return &Exception{Message: content, Code: code}
 }
 
 // Trim the exception message
 func Trim(err error) string {
+	if err == nil {
+		return ""
+	}
 	message := err.Error()
-	match := reEx.FindStringSubmatch(message)
-	if len(match) > 0 {
-		return strings.TrimSpace(match[2])
+	if _, msg, ok := parseException(message); ok {
+		return msg
 	}
 
 	// Trim the Error:
-	match = reErr.FindStringSubmatch(message)
-	if len(match) > 0 {
-		return strings.TrimSpace(match[1])
+	const errPrefix = "Error: "
+	if strings.HasPrefix(message, errPrefix) {
+		return strings.TrimSpace(message[len(errPrefix):])
 	}
 	return message
 }

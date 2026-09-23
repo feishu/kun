@@ -86,6 +86,21 @@ func GetLevel() Level {
 	return Level(logrus.GetLevel())
 }
 
+// IsTrace check if trace level is enabled
+func IsTrace() bool {
+	return logrus.IsLevelEnabled(logrus.TraceLevel)
+}
+
+// IsDebug check if debug level is enabled
+func IsDebug() bool {
+	return logrus.IsLevelEnabled(logrus.DebugLevel)
+}
+
+// IsInfo check if info level is enabled
+func IsInfo() bool {
+	return logrus.IsLevelEnabled(logrus.InfoLevel)
+}
+
 // With fields
 func With(fields F) *Entry {
 	return &Entry{logrus.WithFields(logrus.Fields(fields))}
@@ -93,51 +108,121 @@ func With(fields F) *Entry {
 
 // Trace trace log
 func (entry *Entry) Trace(message string, v ...interface{}) {
+	if entry == nil || entry.Entry == nil || entry.Entry.Logger == nil || !entry.Entry.Logger.IsLevelEnabled(logrus.TraceLevel) {
+		return
+	}
+	if len(v) == 0 {
+		entry.Entry.Trace(message)
+		return
+	}
 	entry.Entry.Trace(fmt.Sprintf(message, v...))
 }
 
 // Trace trace log
 func Trace(message string, v ...interface{}) {
+	if !logrus.IsLevelEnabled(logrus.TraceLevel) {
+		return
+	}
+	if len(v) == 0 {
+		logrus.Trace(message)
+		return
+	}
 	logrus.Trace(fmt.Sprintf(message, v...))
 }
 
 // Debug debug log
 func (entry *Entry) Debug(message string, v ...interface{}) {
+	if entry == nil || entry.Entry == nil || entry.Entry.Logger == nil || !entry.Entry.Logger.IsLevelEnabled(logrus.DebugLevel) {
+		return
+	}
+	if len(v) == 0 {
+		entry.Entry.Debug(message)
+		return
+	}
 	entry.Entry.Debug(fmt.Sprintf(message, v...))
 }
 
 // Debug debug log
 func Debug(message string, v ...interface{}) {
+	if !logrus.IsLevelEnabled(logrus.DebugLevel) {
+		return
+	}
+	if len(v) == 0 {
+		logrus.Debug(message)
+		return
+	}
 	logrus.Debug(fmt.Sprintf(message, v...))
 }
 
 // Info info log
 func (entry *Entry) Info(message string, v ...interface{}) {
+	if entry == nil || entry.Entry == nil || entry.Entry.Logger == nil || !entry.Entry.Logger.IsLevelEnabled(logrus.InfoLevel) {
+		return
+	}
+	if len(v) == 0 {
+		entry.Entry.Info(message)
+		return
+	}
 	entry.Entry.Info(fmt.Sprintf(message, v...))
 }
 
 // Info info log
 func Info(message string, v ...interface{}) {
+	if !logrus.IsLevelEnabled(logrus.InfoLevel) {
+		return
+	}
+	if len(v) == 0 {
+		logrus.Info(message)
+		return
+	}
 	logrus.Info(fmt.Sprintf(message, v...))
 }
 
 // Warn warn log
 func (entry *Entry) Warn(message string, v ...interface{}) {
+	if entry == nil || entry.Entry == nil || entry.Entry.Logger == nil || !entry.Entry.Logger.IsLevelEnabled(logrus.WarnLevel) {
+		return
+	}
+	if len(v) == 0 {
+		entry.Entry.Warn(message)
+		return
+	}
 	entry.Entry.Warn(fmt.Sprintf(message, v...))
 }
 
 // Warn warn log
 func Warn(message string, v ...interface{}) {
+	if !logrus.IsLevelEnabled(logrus.WarnLevel) {
+		return
+	}
+	if len(v) == 0 {
+		logrus.Warn(message)
+		return
+	}
 	logrus.Warn(fmt.Sprintf(message, v...))
 }
 
 // Error error log
 func (entry *Entry) Error(message string, v ...interface{}) {
+	if entry == nil || entry.Entry == nil || entry.Entry.Logger == nil || !entry.Entry.Logger.IsLevelEnabled(logrus.ErrorLevel) {
+		return
+	}
+	if len(v) == 0 {
+		entry.Entry.Error(message)
+		return
+	}
 	entry.Entry.Error(fmt.Sprintf(message, v...))
 }
 
 // Error error log
 func Error(message string, v ...interface{}) {
+	if !logrus.IsLevelEnabled(logrus.ErrorLevel) {
+		return
+	}
+	if len(v) == 0 {
+		logrus.Error(message)
+		return
+	}
 	logrus.Error(fmt.Sprintf(message, v...))
 }
 
