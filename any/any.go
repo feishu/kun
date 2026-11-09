@@ -263,8 +263,16 @@ func (v Any) CFloat64() float64 {
 		return value
 	}
 
-	if v.IsString() && v.String() == "" {
-		return 0
+	if v.IsString() {
+		str := strings.Trim(strings.TrimSpace(v.String()), "'")
+		if str == "" {
+			return 0
+		}
+		val, err := strconv.ParseFloat(str, 64)
+		if err != nil {
+			panic(err.Error())
+		}
+		return val
 	}
 
 	value, err := strconv.ParseFloat(fmt.Sprintf("%v", v.value), 64)

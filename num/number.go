@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // Number type of numberic
@@ -58,7 +59,8 @@ func (n Number) Float64() float64 {
 		return float64(real(n.value.(complex64)))
 	}
 
-	value, err := strconv.ParseFloat(fmt.Sprintf("%v", n.value), 64)
+	str := strings.Trim(strings.TrimSpace(fmt.Sprintf("%v", n.value)), "'")
+	value, err := strconv.ParseFloat(str, 64)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -78,7 +80,8 @@ func (n Number) Float32() float32 {
 		return n.value.(float32)
 	}
 
-	value, err := strconv.ParseFloat(fmt.Sprintf("%v", n.value), 32)
+	str := strings.Trim(strings.TrimSpace(fmt.Sprintf("%v", n.value)), "'")
+	value, err := strconv.ParseFloat(str, 32)
 	if err != nil {
 		panic(err.Error())
 	}
